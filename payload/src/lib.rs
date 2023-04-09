@@ -31,6 +31,13 @@ pub extern fn run(params: PVOID)
             // this kind of stealth.
             dinvoke::dynamic_invoke!(k32,"SwitchToFiber",func,_ret,params); 
             println!("[Payload] I'm alive!");
+            
+            // Uncomment this is you want to check the difference between the two fiber's stacks.
+            // It would be like calling Sleep directly from the payload.
+            
+            /* use std::{thread, time};
+            let sleep_time = time::Duration::from_millis(15000);
+            thread::sleep(sleep_time); */
         }
 
         

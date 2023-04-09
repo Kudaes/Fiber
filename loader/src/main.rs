@@ -51,7 +51,7 @@ fn main() {
             let _ret: Option<()>;
             let func: data::SwitchToFiber;
             dinvoke::dynamic_invoke!(k32,"SwitchToFiber",func,_ret,fiber_dir); 
-            let sleep_time = time::Duration::from_millis(6000);
+            let sleep_time = time::Duration::from_millis(7000);
             thread::sleep(sleep_time);
         }
     }
