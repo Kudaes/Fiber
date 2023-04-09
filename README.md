@@ -46,7 +46,7 @@ After that, simply compile both the payload and the loader and run the last one:
 
 # Usage
 
-There is not much mistery on this PoC execution. All it has to be done is to run the loader and use any tool like ProcessHacker to inspect the thread stack. Since the payload switches back to the control fiber before sleeping, the payload fiber's stack remains hidden most of the time.
+There is not much mistery on this PoC execution. All it has to be done is to run the loader and use any tool like ProcessHacker to inspect the thread stack. Since the payload switches back to the control fiber before sleeping, the payload fiber's stack remains hidden most of the time. You will see in the output how the two fibers are consecutively scheduled following the already commented logic. 
 
 The code is commented to show how to use, create and schedule fibers. You will notice that both the loader and the payload offered as example are "stuck" on an infinite loop, which allows to indefinitely switch between fibers and continue the execution. 
 

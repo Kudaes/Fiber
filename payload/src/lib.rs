@@ -24,7 +24,7 @@ pub extern fn run(params: PVOID)
              */
 
             // Add here any code you want the payload to execute. 
-            
+            println!("[Payload] I'm alive!");
             println!("[PayloaZzZ] Sleeping... Check the stack!");
             println!("--------------------------");
             let k32 = dinvoke::get_module_base_address("kernel32.dll");
@@ -33,7 +33,6 @@ pub extern fn run(params: PVOID)
             // Using DInvoke to call SwitchToFiber, since this is a PoC it is not needed
             // this kind of stealth.
             dinvoke::dynamic_invoke!(k32,"SwitchToFiber",func,_ret,params); 
-            println!("[Payload] I'm alive!");
             
             // Uncomment this is you want to check the difference between the two fiber's stacks.
             // It would be like calling Sleep directly from the payload.

