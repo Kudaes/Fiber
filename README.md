@@ -50,6 +50,6 @@ There is not much mistery on this PoC execution. All it has to be done is to run
 
 The code is commented to show how to use, create and schedule fibers. You will notice that both the loader and the payload offered as example are "stuck" on an infinite loop, which allows to indefinitely switch between fibers and continue the execution. 
 
-If a different payload wants to be tested, just modify the path located on line 32 of the file src::main.rs of the loader. In that case, the new dll has to export a `run(PVOID)` function that will receive as input parameter the address of the control fiber. This function has to switch back to the control fiber in order to call the Sleep function, although you can modify this behavior at will to fit your requirements. 
+If a different payload wants to be tested, just modify the path located on line 32 of the file **src::main.rs** of the loader. In that case, the new dll has to export a `run(PVOID)` function that will receive as input parameter the address of the control fiber. This function has to switch back to the control fiber in order to call the Sleep function, although you can modify this behavior at will to fit your requirements. 
 
 Another way to test this tool with a random payload is to perform IAT hooking to redirect any call to the Sleep function made by the payload to a function located on the loader, allowing to switch back to the control fiber when this call occurs. Up to you.
