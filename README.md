@@ -5,13 +5,18 @@ Fibers allow to have multiple execution flows in a single thread, each one with 
 
 One thread can create multiple fibers, and switch between them at desire by calling the [SwitchToFiber](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-switchtofiber) function. Before that, the current thread itself must have become a fiber by calling [ConvertThreadToFiber](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-convertthreadtofiber) since only a fiber can create other fibers. Finally, in order to create a fiber that, when scheduled, executes an in-memory code (for example, after reflectively loaded a PE or some shellcode) it is just needed to make a call to [CreateFiber](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createfiber).
 
-The SwitchToFiber function is the most important part of this process and where all the magic occurs. This function allows to schedule one fiber or another, all happening on user space. According to the official documentation, "the SwitchToFiber function saves the state information of the current fiber and restores the state of the specified fiber". This mean that when this function is called, the registers' values and the stack are switched from the current fiber state to the target fiber state, allowing to "hide" the stack of the current fiber once the process is completed. This also allows to continue the execution of the target fiber from the same point where the execution was stopped (the same way that it happens when the priority scheduler switches between threads according to its own priority logic). 
+The SwitchToFiber function is the most important part of this process and where all the magic occurs. This function allows to schedule one fiber or another, all happening on user space. According to the official documentation, "the SwitchToFiber function saves the state information of the current fiber and restores the state of the specified fiber". This mean that when this function is called, the registers' values and the stack are switched from the current fiber state to the target fiber state, allowing to "hide" the stack of the current fiber once the process is completed. This also allows to continue the execution of the target fiber from the same point where the execution was stopped (the same way that it happens when the scheduler switches between threads according to its own priority logic). 
 
 And this is exactly what this simple PoC does:
+
 1.- First, we have a loader, which will use DInvoke to manually map the dll that contains our payload.
+
 2.- After that, the loader will turn the current thread into a fiber (known from now on as a control fiber). The control fiber will enjoy of a "normal" stack since the loader is being run from a PE on disk.
+
 3.- The loader will then create a new fiber to run the `run()` function exported by the manually mapped dll. This fiber will be known as the payload fiber from now on.
+
 4.- The control fiber will switch to the payload fiber, which will execute whatever code the payload contains. Once the payload needs to enter on an alertable state (for example, when a call to Sleep is required), the payload fiber switches back to the control fiber, hiding its stack (which may contain several IOC os malicious activity).
+
 5.- The control fiber performs the call to Sleep. When the call returns, it will switch again to the payload fiber so it can continue its execution.
 
 This process repeats indefinitely.
