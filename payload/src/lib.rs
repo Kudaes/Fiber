@@ -23,7 +23,7 @@ pub extern fn run(params: PVOID)
                 without the need of spoofing it. 
              */
 
-            // Add here whatever code you want the payload to execute. 
+            // Add here any code you want the payload to execute. 
             
             println!("[PayloaZzZ] Sleeping... Check the stack!");
             println!("--------------------------");
