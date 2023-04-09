@@ -52,4 +52,9 @@ The code is commented to show how to use, create and schedule fibers. You will n
 
 If a different payload wants to be tested, just modify the path located on line 32 of the file **src::main.rs** of the loader. In that case, the new dll has to export a `run(PVOID)` function that will receive as input parameter the address of the control fiber. This function has to switch back to the control fiber in order to call the Sleep function, although you can modify this behavior at will to fit your requirements. 
 
-Another way to test this tool with a random payload is to perform IAT hooking to redirect any call to the Sleep function made by the payload to a function located on the loader, allowing to switch back to the control fiber when this call occurs. Up to you.
+Another way to test this tool with a random payload is to perform IAT hooking to redirect any call to the Sleep function (or any other imported function) made by the payload to a function located on the loader, allowing to switch back to the control fiber when this call occurs. Up to you.
+
+In the following screenshots we can see how the stack of the current threat moves from one private memory region to another as we switch fibers:
+
+![Stack in Process Hacker](/images/stack1.png "Stack in Process Hacker")
+![Stack in Process Hacker](/images/stack2.png "Stack in Process Hacker")
