@@ -9,15 +9,14 @@ The SwitchToFiber function is the most important part of this process and where 
 
 And this is exactly what this simple PoC does:
 
-1.- First, we have a loader, which will use DInvoke to manually map the dll that contains our payload.
+* First, we have a loader, which will use DInvoke to manually map the dll that contains our payload.
 
-2.- After that, the loader will turn the current thread into a fiber (known from now on as a control fiber). The control fiber will enjoy of a "normal" stack since the loader is being run from a PE on disk.
+* After that, the loader will turn the current thread into a fiber (known from now on as a control fiber). The control fiber will enjoy of a "normal" stack since the loader is being run from a PE on disk.
 
-3.- The loader will then create a new fiber to run the `run()` function exported by the manually mapped dll. This fiber will be known as the payload fiber from now on.
+* The loader will then create a new fiber to run the `run()` function exported by the manually mapped dll. This fiber will be known as the payload fiber from now on.
 
-4.- The control fiber will switch to the payload fiber, which will execute whatever code the payload contains. Once the payload needs to enter on an alertable state (for example, when a call to Sleep is required), the payload fiber switches back to the control fiber, hiding its stack (which may contain several IOC os malicious activity).
-
-5.- The control fiber performs the call to Sleep. When the call returns, it will switch again to the payload fiber so it can continue its execution.
+* The control fiber will switch to the payload fiber, which will execute whatever code the payload contains. Once the payload needs to enter on an alertable state (for example, when a call to Sleep is required), the payload fiber switches back to the control fiber, hiding its stack (which may contain several IOC os malicious activity).
+* The control fiber performs the call to Sleep. When the call returns, it will switch again to the payload fiber so it can continue its execution.
 
 This process repeats indefinitely.
 
