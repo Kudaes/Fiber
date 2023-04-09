@@ -22,6 +22,9 @@ pub extern fn run(params: PVOID)
                 time "sleeping", changing from the beacon fiber to the control fiber would allow to hide the malformed stack 
                 without the need of spoofing it. 
              */
+
+            // Add here whatever code you want the payload to execute. 
+            
             println!("[PayloaZzZ] Sleeping... Check the stack!");
             println!("--------------------------");
             let k32 = dinvoke::get_module_base_address("kernel32.dll");
@@ -34,7 +37,7 @@ pub extern fn run(params: PVOID)
             
             // Uncomment this is you want to check the difference between the two fiber's stacks.
             // It would be like calling Sleep directly from the payload.
-            
+
             /* use std::{thread, time};
             let sleep_time = time::Duration::from_millis(15000);
             thread::sleep(sleep_time); */

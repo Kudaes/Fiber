@@ -10,8 +10,8 @@ The SwitchToFiber function is the most important part of this process and where 
 And this is exactly what this simple PoC does:
 
 * First, we have a loader, which will use DInvoke to manually map the dll that contains our payload.
-* After that, the loader will turn the current thread into a fiber (known from now on as a control fiber). The control fiber will enjoy of a "normal" stack since the loader is being run from a PE on disk.
-* The loader will then create a new fiber to run the `run()` function exported by the manually mapped dll. This fiber will be known as the payload fiber from now on.
+* After that, the loader will turn the current thread into a fiber (known from now on as the **control fiber**). The control fiber will enjoy of a "normal" stack since the loader is being run from a PE on disk.
+* The loader will then create a new fiber to run the `run()` function exported by the manually mapped dll. This fiber will be known as the **payload fiber** from now on.
 * The control fiber will switch to the payload fiber, which will execute whatever code the payload contains. Once the payload needs to enter on an alertable state (for example, when a call to Sleep is required), the payload fiber switches back to the control fiber, hiding its stack (which may contain several IOC os malicious activity).
 * The control fiber performs the call to Sleep. When the call returns, it will switch again to the payload fiber so it can continue its execution.
 
@@ -47,7 +47,9 @@ After that, simply compile both the payload and the loader and run the last one:
 # Usage
 
 There is not much mistery on this PoC execution. All it has to be done is to run the loader and use any tool like ProcessHacker to inspect the thread stack. Since the payload switches back to the control fiber before sleeping, the payload fiber's stack remains hidden most of the time.
+
 The code is commented to show how to use, create and schedule fibers. You will notice that both the loader and the payload offered as example are "stuck" on an infinite loop, which allows to indefinitely switch between fibers and continue the execution. 
+
 If a different payload wants to be tested, just modify the path located on line 32 of the file src::main.rs of the loader. In that case, the new dll has to export a `run(PVOID)` function that will receive as input parameter the address of the control fiber. This function has to switch back to the control fiber in order to call the Sleep function, although you can modify this behavior at will to fit your requirements. 
 
 Another way to test this tool with a random payload is to perform IAT hooking to redirect any call to the Sleep function made by the payload to a function located on the loader, allowing to switch back to the control fiber when this call occurs. Up to you.
