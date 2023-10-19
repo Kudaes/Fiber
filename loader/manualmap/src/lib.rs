@@ -3,6 +3,7 @@ extern crate litcrypt;
 use_litcrypt!();
 
 
+use std::cell::UnsafeCell;
 use std::{collections::HashMap, path::Path};
 use std::{fs, ptr};
 use std::mem::size_of;
@@ -602,9 +603,11 @@ pub fn set_module_section_permissions(pe_info: &PeMetadata, image_ptr: *mut c_vo
 
         let handle = GetCurrentProcess();
         let base_address: *mut PVOID = std::mem::transmute(&image_ptr);
-        let size: *mut usize = std::mem::transmute(&isize::default());
+        let s: UnsafeCell<isize> = isize::default().into();
+        let size: *mut usize = std::mem::transmute(s.get());
         *size = base_of_code;
-        let old_protection: *mut u32 = std::mem::transmute(&u32::default());
+        let o = u32::default();
+        let old_protection: *mut u32 = std::mem::transmute(&o);
         let _ret = dinvoke::nt_protect_virtual_memory(handle, base_address, size, PAGE_READONLY, old_protection);
        
         for section in &pe_info.sections
@@ -642,7 +645,8 @@ pub fn set_module_section_permissions(pe_info: &PeMetadata, image_ptr: *mut c_vo
             let address: *mut c_void = (image_ptr as usize + section.VirtualAddress as usize) as *mut c_void;
             let base_address: *mut PVOID = std::mem::transmute(&address);
             *size = section.Misc.VirtualSize as usize;
-            let old_protection: *mut u32 = std::mem::transmute(&u32::default());
+            let o = u32::default();
+            let old_protection: *mut u32 = std::mem::transmute(&o);
             let ret = dinvoke::nt_protect_virtual_memory(handle, base_address, size, new_protect, old_protection);
             
             let _r = dinvoke::close_handle(handle);

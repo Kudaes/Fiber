@@ -2,6 +2,7 @@
 extern crate litcrypt;
 use_litcrypt!();
 
+use std::cell::UnsafeCell;
 use std::mem::size_of;
 use std::panic;
 use std::{collections::HashMap, ptr};
@@ -10,7 +11,7 @@ use bindings::Windows::Win32::System::Diagnostics::Debug::{GetThreadContext,SetT
 use bindings::Windows::Win32::System::Kernel::UNICODE_STRING;
 use bindings::Windows::Win32::System::Threading::PROCESS_BASIC_INFORMATION;
 use bindings::Windows::Win32::System::WindowsProgramming::{OBJECT_ATTRIBUTES, IO_STATUS_BLOCK};
-use bindings::Windows::Win32::{Foundation::{HANDLE, HINSTANCE}, {System::Threading::{GetCurrentProcess,GetCurrentThread}}};
+use bindings::Windows::Win32::{Foundation::{HANDLE, HINSTANCE}, System::Threading::{GetCurrentProcess,GetCurrentThread}};
 use data::{ApiSetNamespace, ApiSetNamespaceEntry, ApiSetValueEntry, DLL_PROCESS_ATTACH, EAT, EntryPoint, MEM_COMMIT, MEM_RESERVE, PAGE_EXECUTE_READ, PAGE_READWRITE, 
     PVOID, PeMetadata, CONTEXT, NtAllocateVirtualMemoryArgs, EXCEPTION_POINTERS, NtOpenProcessArgs, CLIENT_ID, PROCESS_QUERY_LIMITED_INFORMATION, NtProtectVirtualMemoryArgs,
     PAGE_READONLY, NtWriteVirtualMemoryArgs, ExceptionHandleFunction, PS_ATTRIBUTE_LIST, NtCreateThreadExArgs, LptopLevelExceptionFilter};
@@ -57,7 +58,7 @@ pub fn set_hardware_breakpoint(address: usize)
         let mut lp_context: *mut bindings::Windows::Win32::System::Diagnostics::Debug::CONTEXT = std::mem::transmute(&context);
         GetThreadContext(GetCurrentThread(), lp_context);
 
-        let mut context: *mut CONTEXT = std::mem::transmute(lp_context);
+        let context: *mut CONTEXT = std::mem::transmute(lp_context);
         (*context).Dr0 = address as u64;
         (*context).Dr6 = 0;
         (*context).Dr7 = ((*context).Dr7 & !(((1 << 2) - 1) << 16)) | (0 << 16);
@@ -154,7 +155,6 @@ pub unsafe extern "system" fn breakpoint_handler (exceptioninfo: *mut EXCEPTION_
                         (*(*exceptioninfo).context_record).R8 = std::mem::transmute(NT_CREATE_THREAD_EX_ARGS.attributes);
                         (*(*exceptioninfo).context_record).R9 = NT_CREATE_THREAD_EX_ARGS.process.0 as u64;
                     }                  
-                    _ => (*(*exceptioninfo).context_record).Rip += 1
                 }
             }
         }
@@ -812,9 +812,11 @@ pub fn ldr_get_procedure_address (module_handle: isize, function_name: &str, ord
         let ret: Option<i32>;
         let func_ptr: data::LdrGetProcedureAddress;
         let hmodule: PVOID = std::mem::transmute(module_handle);
-        let return_address: *mut c_void = std::mem::transmute(&usize::default());
+        let r = usize::default();
+        let return_address: *mut c_void = std::mem::transmute(&r);
         let return_address: *mut PVOID = std::mem::transmute(return_address);
-        let mut fun_name: *mut String = std::mem::transmute(&String::default());
+        let f: UnsafeCell<String> = String::default().into();
+        let mut fun_name: *mut String = std::mem::transmute(f.get());
 
         if function_name == ""
         {
